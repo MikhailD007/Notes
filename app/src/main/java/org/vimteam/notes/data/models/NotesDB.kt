@@ -2,7 +2,7 @@ package org.vimteam.notes.data.models
 
 import java.sql.Date
 
-data class Notes(
+data class NotesDB(
     val uid: String,
     val timestamp: Date,
     val tags: Array<String>,
