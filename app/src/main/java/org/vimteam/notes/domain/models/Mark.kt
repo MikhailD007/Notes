@@ -1,6 +1,6 @@
 package org.vimteam.notes.domain.models
 
-enum class Marks {
+enum class Mark {
     IMPORTANT,
     TODO,
     VALUES,
