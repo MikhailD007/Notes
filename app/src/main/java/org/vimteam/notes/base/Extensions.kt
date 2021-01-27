@@ -5,8 +5,11 @@ import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 
@@ -34,6 +37,16 @@ fun Activity.showKeyboard() {
         view,
         InputMethodManager.SHOW_IMPLICIT
     )
+}
+
+fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false): View {
+    return LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)
+}
+
+fun Array<String>.toSimpleString(): String {
+    var returnString = ""
+    for (str in this) returnString = "$returnString$str, "
+    return returnString.substring(0, returnString.length - 2)
 }
 
 fun Activity.setThemeFromPreferences() {

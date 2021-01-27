@@ -6,6 +6,7 @@ import androidx.preference.PreferenceManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.vimteam.notes.R
+import org.vimteam.notes.ui.fragments.NotesListFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,5 +26,8 @@ class MainActivity : AppCompatActivity() {
     private fun initView() {
         setSupportActionBar(toolbar)
         twoPane = secondFragmentContainer != null
+        supportFragmentManager.beginTransaction()
+            .add(R.id.fragmentContainer, NotesListFragment())
+            .commitAllowingStateLoss()
     }
 }

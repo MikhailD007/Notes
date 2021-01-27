@@ -14,6 +14,10 @@ class NotesListViewModel(
 
     override val notesList = MutableLiveData<ArrayList<Note>>()
 
+    init {
+        notesList.value = ArrayList()
+    }
+
     override fun getNotesList() {
         notesList.value = repo.getNotesList()
     }
