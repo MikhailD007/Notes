@@ -49,11 +49,11 @@ fun Array<String>.toSimpleString(): String {
     return returnString.substring(0, returnString.length - 2)
 }
 
-fun Activity.setThemeFromPreferences() {
+//fun Activity.setThemeFromPreferences() {
 //    if (PreferenceManager.getDefaultSharedPreferences(this)
 //            .getBoolean(getString(R.string.dark_theme_selector_key), false)
 //    )
 //        setTheme(R.style.AppThemeDark)
 //    else
 //        setTheme(R.style.AppThemeLight)
-}
+//}
