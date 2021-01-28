@@ -1,7 +1,9 @@
 package org.vimteam.notes.domain.models
 
-import java.time.Instant
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 data class Note(
     val uid: String,
     val timestamp: Long,
@@ -9,7 +11,7 @@ data class Note(
     val mark: Mark,
     val title: String,
     val noteText: String
-) {
+) :Parcelable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

@@ -1,18 +1,19 @@
 package org.vimteam.notes.domain.viewmodels
 
 import androidx.lifecycle.MutableLiveData
-import org.vimteam.notes.domain.contracts.NotesListContract
-import org.vimteam.notes.domain.contracts.NotesListRepositoryContract
+import org.vimteam.notes.domain.contracts.NotesContract
+import org.vimteam.notes.domain.contracts.NotesRepositoryContract
 import org.vimteam.notes.domain.contracts.ResourcesProviderContract
 import org.vimteam.notes.domain.models.Mark
 import org.vimteam.notes.domain.models.Note
 
-class NotesListViewModel(
-    private val repo: NotesListRepositoryContract,
+class NotesViewModel(
+    private val repo: NotesRepositoryContract,
     private val res: ResourcesProviderContract
-): NotesListContract.ViewModel() {
+): NotesContract.ViewModel() {
 
     override val notesList = MutableLiveData<ArrayList<Note>>()
+    override val note = MutableLiveData<Note>()
 
     init {
         notesList.value = ArrayList()

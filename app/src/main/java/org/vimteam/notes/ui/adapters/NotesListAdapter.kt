@@ -8,9 +8,13 @@ import org.vimteam.notes.R
 import org.vimteam.notes.base.inflate
 import org.vimteam.notes.base.toSimpleString
 import org.vimteam.notes.domain.models.Note
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.*
+import kotlin.collections.ArrayList
 
 class NotesListAdapter(
-    private val notes: ArrayList<Note>
+    val notes: ArrayList<Note>
 ): RecyclerView.Adapter<NotesListAdapter.NoteViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
@@ -27,6 +31,12 @@ class NotesListAdapter(
 
     //-------------------------------------------------------------------------------------------
 
+    interface ClickEventHandler {
+        fun notesListItemClick(v: View, note: Note?)
+    }
+
+    //-------------------------------------------------------------------------------------------
+
     class NoteViewHolder(v: View): RecyclerView.ViewHolder(v), View.OnClickListener {
 
         private var view: View = v
@@ -37,14 +47,13 @@ class NotesListAdapter(
         }
 
         override fun onClick(v: View?) {
-            val context = itemView.context
-            //TODO show NoteFragment
+            if (v!=null) (itemView.context as ClickEventHandler).notesListItemClick(v, note)
         }
 
         fun bindNote(note: Note) {
             this.note = note
             view.titleTextView.text = note.title
-            view.dateTextView.text = note.timestamp.toString()
+            view.dateTextView.text = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(note.timestamp)
             view.tagsTextView.text = note.tags.toSimpleString()
         }
 

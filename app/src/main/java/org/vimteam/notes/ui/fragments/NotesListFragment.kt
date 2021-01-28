@@ -5,13 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.fragment_notes_list.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
-import org.vimteam.notes.domain.contracts.NotesListContract
+import org.vimteam.notes.domain.contracts.NotesContract
+import org.vimteam.notes.ui.adapters.NotesListAdapter
 
 class NotesListFragment: Fragment() {
 
-    private val vm: NotesListContract.ViewModel by viewModel()
+    private val vm: NotesContract.ViewModel by viewModel()
+    private val notesAdapter: NotesListAdapter = NotesListAdapter(ArrayList())
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -24,9 +27,13 @@ class NotesListFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        notesListRecyclerView.adapter = notesAdapter
         vm.notesList.observe(viewLifecycleOwner) {
-            //TODO notifyDataSetChanged in notes adapter
+            notesAdapter.notes.clear()
+            notesAdapter.notes.addAll(it)
+            notesAdapter.notifyDataSetChanged()
         }
+        vm.getNotesList()
     }
 
 }

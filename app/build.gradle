@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-android-extensions'
+    id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
     id 'koin'
 }
@@ -68,6 +69,7 @@ dependencies {
     implementation 'org.koin:koin-androidx-viewmodel:2.2.1'
 
     //Test
+    //noinspection GradleDynamicVersion
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

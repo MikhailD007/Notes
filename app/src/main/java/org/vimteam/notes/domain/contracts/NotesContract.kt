@@ -4,11 +4,12 @@ import androidx.lifecycle.LiveData
 import org.vimteam.notes.domain.models.Mark
 import org.vimteam.notes.domain.models.Note
 
-interface NotesListContract {
+interface NotesContract {
 
     abstract class ViewModel : androidx.lifecycle.ViewModel() {
 
         abstract val notesList: LiveData<ArrayList<Note>>
+        abstract val note: LiveData<Note>
 
         @Throws(Exception::class)
         abstract fun getNotesList()

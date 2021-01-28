@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "590009346210",
+    "project_id": "notes-197c2",
+    "storage_bucket": "notes-197c2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:590009346210:android:ef23535046a49297654ffb",
+        "android_client_info": {
+          "package_name": "org.vimteam.notes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "590009346210-b1aqfa4vg0cp8j3ggch0r6eajm4s5cd1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.vimteam.notes",
+            "certificate_hash": "69ca9b0e9b1f2c1ba153975421d6f1859a89dc38"
+          }
+        },
+        {
+          "client_id": "590009346210-b0iru69icl201shuoasjgm7cne0duqsf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFf9-OLN1pBx7cNR8K0gGBdYV29neA8tI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "590009346210-b0iru69icl201shuoasjgm7cne0duqsf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
