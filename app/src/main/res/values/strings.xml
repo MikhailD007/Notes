@@ -9,4 +9,6 @@
     <string name="delete_note">Delete note</string>
     <string name="about_information">Some important information about this application, that nobody never read</string>
     <string name="close">Close</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

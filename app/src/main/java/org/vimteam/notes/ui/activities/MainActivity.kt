@@ -3,9 +3,15 @@ package org.vimteam.notes.ui.activities
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.vimteam.notes.R
 import org.vimteam.notes.domain.models.Note
@@ -14,6 +20,7 @@ import org.vimteam.notes.ui.fragments.AboutFragment
 import org.vimteam.notes.ui.fragments.NoteViewFragment
 import org.vimteam.notes.ui.fragments.NotesListFragment
 import org.vimteam.notes.ui.interfaces.MenuItemSelectedHandler
+
 
 class MainActivity : AppCompatActivity(), NotesListAdapter.ClickEventHandler,
     MenuItemSelectedHandler {
@@ -34,9 +41,30 @@ class MainActivity : AppCompatActivity(), NotesListAdapter.ClickEventHandler,
     private fun initView() {
         setSupportActionBar(toolbar)
         twoPane = secondFragmentContainer != null
+        initDrawer(toolbar)
         supportFragmentManager.beginTransaction()
             .add(R.id.fragmentContainer, NotesListFragment())
             .commitAllowingStateLoss()
+    }
+
+    private fun initDrawer(toolbar: Toolbar) {
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val toggle = ActionBarDrawerToggle(
+            this, drawer, toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
+        drawer.addDrawerListener(toggle)
+        toggle.syncState()
+
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        navigationView.setNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.aboutMenuItem -> showDetailFragment(AboutFragment())
+            }
+            drawer.closeDrawer(GravityCompat.START)
+            true
+        }
     }
 
     override fun notesListItemClick(v: View, note: Note?) {
@@ -60,10 +88,10 @@ class MainActivity : AppCompatActivity(), NotesListAdapter.ClickEventHandler,
         Toast.makeText(this, "Delete note", Toast.LENGTH_SHORT).show()
     }
 
-    private fun showDetailFragment(fragment : Fragment) {
+    private fun showDetailFragment(fragment: Fragment) {
         val containerId = if (twoPane) R.id.secondFragmentContainer else R.id.fragmentContainer
         supportFragmentManager.beginTransaction()
-            .add(containerId,fragment)
+            .add(containerId, fragment)
             .addToBackStack(null)
             .commitAllowingStateLoss()
     }
