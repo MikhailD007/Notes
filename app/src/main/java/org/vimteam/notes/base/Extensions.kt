@@ -12,6 +12,9 @@ import android.view.inputmethod.InputMethodManager
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import org.vimteam.notes.R
+import java.text.SimpleDateFormat
+import java.util.*
 
 fun Fragment.vibratePhone() {
     val vibrator = context?.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
@@ -48,6 +51,11 @@ fun Array<String>.toSimpleString(): String {
     for (str in this) returnString = "$returnString$str, "
     return returnString.substring(0, returnString.length - 2)
 }
+
+fun Long.formatTimestamp(): String = SimpleDateFormat(
+        "dd.MM.yyyy HH:mm",
+        Locale.getDefault()
+    ).format(this)
 
 //fun Activity.setThemeFromPreferences() {
 //    if (PreferenceManager.getDefaultSharedPreferences(this)

@@ -17,6 +17,7 @@ import org.vimteam.notes.R
 import org.vimteam.notes.domain.models.Note
 import org.vimteam.notes.ui.adapters.NotesListAdapter
 import org.vimteam.notes.ui.fragments.AboutFragment
+import org.vimteam.notes.ui.fragments.NoteEditFragment
 import org.vimteam.notes.ui.fragments.NoteViewFragment
 import org.vimteam.notes.ui.fragments.NotesListFragment
 import org.vimteam.notes.ui.interfaces.MenuItemSelectedHandler
@@ -78,14 +79,16 @@ class MainActivity : AppCompatActivity(), NotesListAdapter.ClickEventHandler,
 
     override fun addNewNote() {
         Toast.makeText(this, "Add new note", Toast.LENGTH_SHORT).show()
+        showDetailFragment(NoteEditFragment.newInstance(null, twoPane))
     }
 
-    override fun editNote() {
-        Toast.makeText(this, "Edit note", Toast.LENGTH_SHORT).show()
+    override fun editNote(note: Note) {
+        Toast.makeText(this, "Edit note ${note.toString()}", Toast.LENGTH_SHORT).show()
+        showDetailFragment(NoteEditFragment.newInstance(note, twoPane))
     }
 
-    override fun deleteNote() {
-        Toast.makeText(this, "Delete note", Toast.LENGTH_SHORT).show()
+    override fun deleteNote(note: Note) {
+        Toast.makeText(this, "Delete note ${note.toString()}", Toast.LENGTH_SHORT).show()
     }
 
     private fun showDetailFragment(fragment: Fragment) {

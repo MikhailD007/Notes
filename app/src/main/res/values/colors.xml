@@ -7,4 +7,6 @@
     <color name="orange_700">#F57C00</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="gray_300">#bdbdbd</color>
+    <color name="gray_500">#717171</color>
 </resources>

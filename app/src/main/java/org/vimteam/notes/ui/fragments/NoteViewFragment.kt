@@ -5,6 +5,7 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_note_view.view.*
 import org.vimteam.notes.R
+import org.vimteam.notes.base.formatTimestamp
 import org.vimteam.notes.base.toSimpleString
 import org.vimteam.notes.domain.models.Note
 import org.vimteam.notes.ui.interfaces.MenuItemSelectedHandler
@@ -55,22 +56,22 @@ class NoteViewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         if (note == null) return
         view.titleTextView.text = note?.title
-        view.dateTextView.text =
-            SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(note?.timestamp)
+        view.dateTextView.text = note?.timestamp?.formatTimestamp()
         view.tagsTextView.text = note?.tags?.toSimpleString() ?: ""
         view.noteTextTextView.text = note?.noteText
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         if (!twoPane) menu.clear()
+        if (note == null) return
         if (menu.findItem(R.id.editNoteMenuItem) == null) inflater.inflate(R.menu.note_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.editNoteMenuItem -> (activity as MenuItemSelectedHandler).editNote()
-            R.id.deleteNoteMenuItem -> (activity as MenuItemSelectedHandler).deleteNote()
+            R.id.editNoteMenuItem -> if (note != null) (activity as MenuItemSelectedHandler).editNote(note!!)
+            R.id.deleteNoteMenuItem -> if (note != null) (activity as MenuItemSelectedHandler).deleteNote(note!!)
         }
         return super.onOptionsItemSelected(item)
     }

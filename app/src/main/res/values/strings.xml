@@ -11,4 +11,11 @@
     <string name="close">Close</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="timestamp_format">dd.MM.yyyy HH:mm</string>
+    <string name="note_title">Note title</string>
+    <string name="date">Date</string>
+    <string name="note_text">Note text</string>
+    <string name="save_note">Save note</string>
+    <string name="cancel">Cancel</string>
+    <string name="tags_hint">Tags separated with comma</string>
 </resources>

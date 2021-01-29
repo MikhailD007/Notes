@@ -2,6 +2,7 @@ package org.vimteam.notes.domain.models
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
+import org.vimteam.notes.base.formatTimestamp
 
 @Parcelize
 data class Note(
@@ -26,4 +27,6 @@ data class Note(
     override fun hashCode(): Int {
         return uid.hashCode()
     }
+
+    override fun toString() = "${timestamp.formatTimestamp()} $title"
 }
