@@ -6,17 +6,20 @@ import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_notes_list.*
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
-import org.vimteam.notes.domain.contracts.NotesContract
+import org.vimteam.notes.domain.contracts.NotesListContract
+import org.vimteam.notes.domain.models.NavigationActions
 import org.vimteam.notes.domain.models.NavigationActions.*
+import org.vimteam.notes.domain.viewmodels.NavigationViewModel
 import org.vimteam.notes.ui.adapters.NotesListAdapter
-import org.vimteam.notes.ui.interfaces.MenuItemSelectedHandler
+import org.vimteam.notes.ui.interfaces.NotesListAdapterEventHandler
 
+class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
 
-class NotesListFragment : Fragment(), NotesListAdapter.ContextMenuHandler {
-
-    private val vm: NotesContract.ViewModel by viewModel()
+    private val notesListViewModel by viewModel<NotesListContract.ViewModel>()
+    private val navigationViewModel by sharedViewModel<NavigationViewModel>()
     private val notesAdapter: NotesListAdapter = NotesListAdapter(ArrayList(), this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,31 +38,22 @@ class NotesListFragment : Fragment(), NotesListAdapter.ContextMenuHandler {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initView()
+    }
+
+    private fun initView() {
         notesListRecyclerView.adapter = notesAdapter
-        vm.notesList.observe(viewLifecycleOwner) {
+        notesListViewModel.notesList.observe(viewLifecycleOwner) {
             notesAdapter.notes.clear()
             notesAdapter.notes.addAll(it)
             notesAdapter.notifyDataSetChanged()
         }
-        vm.navigation.observe(viewLifecycleOwner) {
-            when (it) {
-                NONE -> null //do nothing
-                CREATE -> (activity as MenuItemSelectedHandler).addNewNote()
-                READ -> null //do nothing
-                UPDATE -> if (vm.note.value != null) (activity as MenuItemSelectedHandler).editNote(
-                    vm.note.value!!
-                )
-                DELETE -> {
-                    notesAdapter.notes.clear()
-                    notesAdapter.notes.addAll(vm.notesList.value ?: ArrayList())
-                    notesAdapter.notifyDataSetChanged()
-                }
-                ABOUT -> (activity as MenuItemSelectedHandler).showAbout()
-            }
+        notesListViewModel.getNotesList()
+        navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
+            if (it == DELETE) notesListViewModel.deleteNote(notesAdapter.getSelectedNoteUid())
         }
-        vm.getNotesList()
         addNoteFloatingActionButton.setOnClickListener {
-            vm.createNote()
+            navigationViewModel.showNote(CREATE, "")
         }
     }
 
@@ -81,8 +75,8 @@ class NotesListFragment : Fragment(), NotesListAdapter.ContextMenuHandler {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.aboutMenuItem -> vm.showAbout()
-            R.id.addNoteMenuItem -> vm.createNote()
+            R.id.aboutMenuItem -> navigationViewModel.showAbout()
+            R.id.addNoteMenuItem -> navigationViewModel.showNote(CREATE, "")
         }
         return super.onOptionsItemSelected(item)
     }
@@ -102,9 +96,16 @@ class NotesListFragment : Fragment(), NotesListAdapter.ContextMenuHandler {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.editNoteMenuItem -> vm.editNote(notesAdapter.getSelectedPosition())
-            R.id.deleteNoteMenuItem -> vm.deleteNote(notesAdapter.getSelectedPosition())
+            R.id.editNoteMenuItem -> navigationViewModel.showNote(
+                UPDATE,
+                notesAdapter.getSelectedNoteUid()
+            )
+            R.id.deleteNoteMenuItem -> notesListViewModel.deleteNote(notesAdapter.getSelectedNoteUid())
         }
         return super.onContextItemSelected(item)
+    }
+
+    override fun notesListItemClick(v: View, noteUid: String) {
+        navigationViewModel.showNote(READ, noteUid)
     }
 }

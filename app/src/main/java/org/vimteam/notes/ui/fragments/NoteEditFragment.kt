@@ -1,12 +1,10 @@
 package org.vimteam.notes.ui.fragments
 
-import android.R.attr.editable
 import android.os.Bundle
 import android.text.Editable
 import android.text.Spanned
 import android.text.TextWatcher
 import android.text.style.ImageSpan
-import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import com.google.android.material.chip.ChipDrawable
@@ -14,10 +12,12 @@ import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import kotlinx.android.synthetic.main.fragment_note_edit.*
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
-import org.vimteam.notes.base.MainConstants.LOG_TAG
 import org.vimteam.notes.base.formatTimestamp
-import org.vimteam.notes.domain.models.Note
+import org.vimteam.notes.domain.viewmodels.NavigationViewModel
+import org.vimteam.notes.domain.viewmodels.NoteViewModel
 import java.util.*
 
 
@@ -25,20 +25,20 @@ class NoteEditFragment : Fragment() {
 
     companion object {
         private const val NOTE_KEY = "note_key"
-        private const val TWO_PANE = "two_pane"
 
-        fun newInstance(note: Note?, twoPane: Boolean): Fragment {
+        fun newInstance(noteUid: String): Fragment {
             val noteEditFragment = NoteEditFragment()
             val bundle = Bundle()
-            bundle.putParcelable(NOTE_KEY, note)
-            bundle.putBoolean(TWO_PANE, twoPane)
+            bundle.putString(NOTE_KEY, noteUid)
             noteEditFragment.arguments = bundle
             return noteEditFragment
         }
     }
 
-    private var note: Note? = null
-    private var twoPane: Boolean = false
+    private val navigationViewModel by sharedViewModel<NavigationViewModel>()
+    private val noteViewModel by viewModel<NoteViewModel>()
+
+    private var noteUid: String = ""
     private var spannedLength: Int = 0
 
     private lateinit var datePickerDialog: DatePickerDialog
@@ -50,8 +50,7 @@ class NoteEditFragment : Fragment() {
         if (arguments == null || !arguments.containsKey(NOTE_KEY)) {
             return
         } else {
-            note = arguments.getParcelable(NOTE_KEY)
-            if (arguments.containsKey(TWO_PANE)) twoPane = arguments.getBoolean(TWO_PANE)
+            val noteUid = arguments.getString(NOTE_KEY, "")
         }
     }
 
@@ -70,7 +69,6 @@ class NoteEditFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (!twoPane) menu.clear()
         menu.removeItem(R.id.editNoteMenuItem)
         menu.removeItem(R.id.deleteNoteMenuItem)
         if (menu.findItem(R.id.saveNoteMenuItem) == null) inflater.inflate(
@@ -83,7 +81,8 @@ class NoteEditFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.saveNoteMenuItem -> saveNote()
-            R.id.cancelMenuItem -> activity?.onBackPressed()
+            R.id.cancelMenuItem -> activity?.supportFragmentManager?.beginTransaction()
+                ?.remove(this)?.commitAllowingStateLoss()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -97,11 +96,14 @@ class NoteEditFragment : Fragment() {
                 "DatePickerDialog"
             )
         }
-        if (note == null) return
-        titleEditText.setText(note?.title)
-        dateEditText.setText(note?.timestamp?.formatTimestamp())
-        dateEditText.tag = note?.timestamp
-        noteEditText.setText(note?.noteText)
+        if (noteUid == "") return
+        noteViewModel.note.observe(viewLifecycleOwner) {
+            titleEditText.setText(it.title)
+            dateEditText.setText(it.timestamp.formatTimestamp())
+            dateEditText.tag = it.timestamp
+            noteEditText.setText(it.noteText)
+        }
+        noteViewModel.showNote(noteUid)
     }
 
     private fun initDateTimePicker(title: String, isThemeDark: Boolean = false) {
@@ -127,7 +129,8 @@ class NoteEditFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {
                 if (s == null) return
                 if (s.toString().substring(s.length - 1) == ",") {
-                    val chip: ChipDrawable = ChipDrawable.createFromResource(requireContext(), R.xml.chip)
+                    val chip: ChipDrawable =
+                        ChipDrawable.createFromResource(requireContext(), R.xml.chip)
                     chip.text = s.toString().substring(spannedLength, s.length - 1)
                     chip.setBounds(0, 0, chip.intrinsicWidth, chip.intrinsicHeight)
                     val span = ImageSpan(chip)

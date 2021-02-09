@@ -4,32 +4,33 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_note_view.view.*
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
 import org.vimteam.notes.base.formatTimestamp
 import org.vimteam.notes.base.toSimpleString
-import org.vimteam.notes.domain.models.Note
-import org.vimteam.notes.ui.interfaces.MenuItemSelectedHandler
-import java.text.SimpleDateFormat
-import java.util.*
+import org.vimteam.notes.domain.contracts.NoteContract
+import org.vimteam.notes.domain.models.NavigationActions
+import org.vimteam.notes.domain.viewmodels.NavigationViewModel
 
 class NoteViewFragment : Fragment() {
 
     companion object {
         private const val NOTE_KEY = "note_key"
-        private const val TWO_PANE = "two_pane"
 
-        fun newInstance(note: Note, twoPane: Boolean): Fragment {
+        fun newInstance(noteUid: String): Fragment {
             val noteViewFragment = NoteViewFragment()
             val bundle = Bundle()
-            bundle.putParcelable(NOTE_KEY, note)
-            bundle.putBoolean(TWO_PANE, twoPane)
+            bundle.putString(NOTE_KEY, noteUid)
             noteViewFragment.arguments = bundle
             return noteViewFragment
         }
     }
 
-    private var note: Note? = null
-    private var twoPane: Boolean = false
+    private val noteViewModel by viewModel<NoteContract.ViewModel>()
+    private val navigationViewModel by sharedViewModel<NavigationViewModel>()
+
+    private var noteUid: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,9 +39,9 @@ class NoteViewFragment : Fragment() {
         if (arguments == null || !arguments.containsKey(NOTE_KEY)) {
             return
         } else {
-            note = arguments.getParcelable(NOTE_KEY)
-            if (arguments.containsKey(TWO_PANE)) twoPane = arguments.getBoolean(TWO_PANE)
+            noteUid = arguments.getString(NOTE_KEY, "")
         }
+        if (noteUid == "") return
     }
 
     override fun onCreateView(
@@ -54,24 +55,35 @@ class NoteViewFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (note == null) return
-        view.titleTextView.text = note?.title
-        view.dateTextView.text = note?.timestamp?.formatTimestamp()
-        view.tagsTextView.text = note?.tags?.toSimpleString() ?: ""
-        view.noteTextTextView.text = note?.noteText
+        initView(view)
+    }
+
+    private fun initView(view: View) {
+        noteViewModel.note.observe(viewLifecycleOwner) {
+            view.titleTextView.text = it.title
+            view.dateTextView.text = it.timestamp.formatTimestamp()
+            view.tagsTextView.text = it.tags.toSimpleString()
+            view.noteTextTextView.text = it.noteText
+        }
+        noteViewModel.showNote(noteUid)
+        navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
+            if (it == NavigationActions.DELETE) activity?.supportFragmentManager?.beginTransaction()
+                ?.remove(this)?.commitAllowingStateLoss()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (!twoPane) menu.clear()
-        if (note == null) return
         if (menu.findItem(R.id.editNoteMenuItem) == null) inflater.inflate(R.menu.note_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.editNoteMenuItem -> if (note != null) (activity as MenuItemSelectedHandler).editNote(note!!)
-            //R.id.deleteNoteMenuItem -> if (note != null) (activity as MenuItemSelectedHandler).deleteNote(note!!)
+            R.id.editNoteMenuItem -> navigationViewModel.showNote(NavigationActions.UPDATE, noteUid)
+            R.id.deleteNoteMenuItem -> navigationViewModel.showNote(
+                NavigationActions.DELETE,
+                noteUid
+            )
         }
         return super.onOptionsItemSelected(item)
     }
