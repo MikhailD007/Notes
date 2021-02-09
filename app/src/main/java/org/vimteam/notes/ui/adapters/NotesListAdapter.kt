@@ -9,13 +9,14 @@ import org.vimteam.notes.base.inflate
 import org.vimteam.notes.base.toSimpleString
 import org.vimteam.notes.domain.models.Note
 import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.collections.ArrayList
 
 class NotesListAdapter(
-    val notes: ArrayList<Note>
-): RecyclerView.Adapter<NotesListAdapter.NoteViewHolder>() {
+    val notes: ArrayList<Note>,
+    val fragment: ContextMenuHandler
+) : RecyclerView.Adapter<NotesListAdapter.NoteViewHolder>() {
+
+    var selectedPos: Int = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         val inflatedView = parent.inflate(R.layout.item_notes_list, false)
@@ -29,36 +30,48 @@ class NotesListAdapter(
 
     override fun getItemCount() = notes.size
 
+    fun getSelectedPosition() = selectedPos
+
     //-------------------------------------------------------------------------------------------
 
     interface ClickEventHandler {
         fun notesListItemClick(v: View, note: Note?)
     }
 
+    interface ContextMenuHandler {
+        fun registerContextMenu(v: View)
+    }
+
     //-------------------------------------------------------------------------------------------
 
-    class NoteViewHolder(v: View): RecyclerView.ViewHolder(v), View.OnClickListener {
+    inner class NoteViewHolder(v: View) : RecyclerView.ViewHolder(v), View.OnClickListener{
 
         private var view: View = v
         private var note: Note? = null
 
         init {
             v.setOnClickListener(this)
+            registerContextMenu()
         }
 
         override fun onClick(v: View?) {
-            if (v!=null) (itemView.context as ClickEventHandler).notesListItemClick(v, note)
+            if (v != null) (itemView.context as ClickEventHandler).notesListItemClick(v, note)
         }
 
         fun bindNote(note: Note) {
             this.note = note
             view.titleTextView.text = note.title
-            view.dateTextView.text = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(note.timestamp)
+            view.dateTextView.text =
+                SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(note.timestamp)
             view.tagsTextView.text = note.tags.toSimpleString()
         }
 
-        companion object {
-            private const val NOTE_KEY = "NOTE"
+        private fun registerContextMenu() {
+            itemView.setOnLongClickListener {
+                selectedPos = layoutPosition
+                return@setOnLongClickListener false
+            }
+            fragment.registerContextMenu(itemView)
         }
     }
 

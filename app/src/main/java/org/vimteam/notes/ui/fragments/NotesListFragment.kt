@@ -9,14 +9,15 @@ import kotlinx.android.synthetic.main.fragment_notes_list.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
 import org.vimteam.notes.domain.contracts.NotesContract
+import org.vimteam.notes.domain.models.NavigationActions.*
 import org.vimteam.notes.ui.adapters.NotesListAdapter
 import org.vimteam.notes.ui.interfaces.MenuItemSelectedHandler
 
 
-class NotesListFragment : Fragment() {
+class NotesListFragment : Fragment(), NotesListAdapter.ContextMenuHandler {
 
     private val vm: NotesContract.ViewModel by viewModel()
-    private val notesAdapter: NotesListAdapter = NotesListAdapter(ArrayList())
+    private val notesAdapter: NotesListAdapter = NotesListAdapter(ArrayList(), this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,9 +41,25 @@ class NotesListFragment : Fragment() {
             notesAdapter.notes.addAll(it)
             notesAdapter.notifyDataSetChanged()
         }
+        vm.navigation.observe(viewLifecycleOwner) {
+            when (it) {
+                NONE -> null //do nothing
+                CREATE -> (activity as MenuItemSelectedHandler).addNewNote()
+                READ -> null //do nothing
+                UPDATE -> if (vm.note.value != null) (activity as MenuItemSelectedHandler).editNote(
+                    vm.note.value!!
+                )
+                DELETE -> {
+                    notesAdapter.notes.clear()
+                    notesAdapter.notes.addAll(vm.notesList.value ?: ArrayList())
+                    notesAdapter.notifyDataSetChanged()
+                }
+                ABOUT -> (activity as MenuItemSelectedHandler).showAbout()
+            }
+        }
         vm.getNotesList()
         addNoteFloatingActionButton.setOnClickListener {
-            (activity as MenuItemSelectedHandler).addNewNote()
+            vm.createNote()
         }
     }
 
@@ -64,9 +81,30 @@ class NotesListFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.aboutMenuItem -> (activity as MenuItemSelectedHandler).showAbout()
-            R.id.addNoteMenuItem -> (activity as MenuItemSelectedHandler).addNewNote()
+            R.id.aboutMenuItem -> vm.showAbout()
+            R.id.addNoteMenuItem -> vm.createNote()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun registerContextMenu(v: View) {
+        registerForContextMenu(v)
+    }
+
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        requireActivity().menuInflater.inflate(R.menu.note_menu, menu)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.editNoteMenuItem -> vm.editNote(notesAdapter.getSelectedPosition())
+            R.id.deleteNoteMenuItem -> vm.deleteNote(notesAdapter.getSelectedPosition())
+        }
+        return super.onContextItemSelected(item)
     }
 }

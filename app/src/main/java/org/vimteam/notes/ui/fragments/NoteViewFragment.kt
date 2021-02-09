@@ -71,7 +71,7 @@ class NoteViewFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.editNoteMenuItem -> if (note != null) (activity as MenuItemSelectedHandler).editNote(note!!)
-            R.id.deleteNoteMenuItem -> if (note != null) (activity as MenuItemSelectedHandler).deleteNote(note!!)
+            //R.id.deleteNoteMenuItem -> if (note != null) (activity as MenuItemSelectedHandler).deleteNote(note!!)
         }
         return super.onOptionsItemSelected(item)
     }

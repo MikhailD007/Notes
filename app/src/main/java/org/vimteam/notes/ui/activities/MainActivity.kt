@@ -78,17 +78,11 @@ class MainActivity : AppCompatActivity(), NotesListAdapter.ClickEventHandler,
     }
 
     override fun addNewNote() {
-        Toast.makeText(this, "Add new note", Toast.LENGTH_SHORT).show()
         showDetailFragment(NoteEditFragment.newInstance(null, twoPane))
     }
 
     override fun editNote(note: Note) {
-        Toast.makeText(this, "Edit note ${note.toString()}", Toast.LENGTH_SHORT).show()
         showDetailFragment(NoteEditFragment.newInstance(note, twoPane))
-    }
-
-    override fun deleteNote(note: Note) {
-        Toast.makeText(this, "Delete note ${note.toString()}", Toast.LENGTH_SHORT).show()
     }
 
     private fun showDetailFragment(fragment: Fragment) {
