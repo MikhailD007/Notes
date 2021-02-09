@@ -1,0 +1,160 @@
+package org.vimteam.notes.ui.fragments
+
+import android.R.attr.editable
+import android.os.Bundle
+import android.text.Editable
+import android.text.Spanned
+import android.text.TextWatcher
+import android.text.style.ImageSpan
+import android.util.Log
+import android.view.*
+import androidx.fragment.app.Fragment
+import com.google.android.material.chip.ChipDrawable
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
+import kotlinx.android.synthetic.main.fragment_note_edit.*
+import org.joda.time.LocalDate
+import org.joda.time.format.DateTimeFormat
+import org.vimteam.notes.R
+import org.vimteam.notes.base.MainConstants.LOG_TAG
+import org.vimteam.notes.base.formatTimestamp
+import org.vimteam.notes.domain.models.Note
+import java.util.*
+
+
+class NoteEditFragment : Fragment() {
+
+    companion object {
+        private const val NOTE_KEY = "note_key"
+        private const val TWO_PANE = "two_pane"
+
+        fun newInstance(note: Note?, twoPane: Boolean): Fragment {
+            val noteEditFragment = NoteEditFragment()
+            val bundle = Bundle()
+            bundle.putParcelable(NOTE_KEY, note)
+            bundle.putBoolean(TWO_PANE, twoPane)
+            noteEditFragment.arguments = bundle
+            return noteEditFragment
+        }
+    }
+
+    private var note: Note? = null
+    private var twoPane: Boolean = false
+    private var spannedLength: Int = 0
+
+    private lateinit var datePickerDialog: DatePickerDialog
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) setHasOptionsMenu(true)
+        val arguments = arguments
+        if (arguments == null || !arguments.containsKey(NOTE_KEY)) {
+            return
+        } else {
+            note = arguments.getParcelable(NOTE_KEY)
+            if (arguments.containsKey(TWO_PANE)) twoPane = arguments.getBoolean(TWO_PANE)
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
+        return inflater.inflate(R.layout.fragment_note_edit, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initView()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        if (!twoPane) menu.clear()
+        menu.removeItem(R.id.editNoteMenuItem)
+        menu.removeItem(R.id.deleteNoteMenuItem)
+        if (menu.findItem(R.id.saveNoteMenuItem) == null) inflater.inflate(
+            R.menu.note_edit_menu,
+            menu
+        )
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.saveNoteMenuItem -> saveNote()
+            R.id.cancelMenuItem -> activity?.onBackPressed()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun initView() {
+        initDateTimePicker(getString(R.string.date))
+        initTagsInputText()
+        dateEditText.setOnFocusChangeListener { _, b ->
+            if (b) datePickerDialog.show(
+                childFragmentManager,
+                "DatePickerDialog"
+            )
+        }
+        if (note == null) return
+        titleEditText.setText(note?.title)
+        dateEditText.setText(note?.timestamp?.formatTimestamp())
+        dateEditText.tag = note?.timestamp
+        noteEditText.setText(note?.noteText)
+    }
+
+    private fun initDateTimePicker(title: String, isThemeDark: Boolean = false) {
+        datePickerDialog = DatePickerDialog.newInstance { _, year, monthOfYear, dayOfMonth ->
+            dateEditText.setText(
+                localeDateToString(
+                    LocalDate(
+                        year,
+                        monthOfYear + 1,
+                        dayOfMonth
+                    )
+                )
+            )
+            dateTextInputLayout.error = null
+        }
+        datePickerDialog.isThemeDark = isThemeDark
+        datePickerDialog.showYearPickerFirst(false)
+        datePickerDialog.setTitle(title)
+    }
+
+    private fun initTagsInputText() {
+        tagsEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (s == null) return
+                if (s.toString().substring(s.length - 1) == ",") {
+                    val chip: ChipDrawable = ChipDrawable.createFromResource(requireContext(), R.xml.chip)
+                    chip.text = s.toString().substring(spannedLength, s.length - 1)
+                    chip.setBounds(0, 0, chip.intrinsicWidth, chip.intrinsicHeight)
+                    val span = ImageSpan(chip)
+                    s.setSpan(
+                        span,
+                        spannedLength,
+                        s.length - 1,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    spannedLength = s.length
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+        })
+    }
+
+    private fun localeDateToString(date: LocalDate, locale: Locale = Locale.getDefault()): String {
+        return date.toString(DateTimeFormat.shortDate().withLocale(locale))
+    }
+
+    private fun saveNote() {
+        //TODO save note using NotesViewModel
+    }
+
+}

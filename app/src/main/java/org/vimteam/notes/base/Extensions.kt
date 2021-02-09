@@ -5,10 +5,16 @@ import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import org.vimteam.notes.R
+import java.text.SimpleDateFormat
+import java.util.*
 
 fun Fragment.vibratePhone() {
     val vibrator = context?.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
@@ -36,11 +42,26 @@ fun Activity.showKeyboard() {
     )
 }
 
-fun Activity.setThemeFromPreferences() {
+fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false): View {
+    return LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)
+}
+
+fun Array<String>.toSimpleString(): String {
+    var returnString = ""
+    for (str in this) returnString = "$returnString$str, "
+    return returnString.substring(0, returnString.length - 2)
+}
+
+fun Long.formatTimestamp(): String = SimpleDateFormat(
+        "dd.MM.yyyy HH:mm",
+        Locale.getDefault()
+    ).format(this)
+
+//fun Activity.setThemeFromPreferences() {
 //    if (PreferenceManager.getDefaultSharedPreferences(this)
 //            .getBoolean(getString(R.string.dark_theme_selector_key), false)
 //    )
 //        setTheme(R.style.AppThemeDark)
 //    else
 //        setTheme(R.style.AppThemeLight)
-}
+//}
