@@ -2,13 +2,13 @@ package org.vimteam.notes.data.models
 
 import org.vimteam.notes.base.formatTimestamp
 
-data class NoteDBListElement(
-    val uid: String,
-    val timestamp: Long,
-    val tags: String,
-    val mark: Int,
-    val title: String
-) {
+class NoteDBListElement {
+    var uid: String = ""
+    var timestamp: Long = 0
+    var tags: String = ""
+    var mark: Int = 0
+    var title: String =""
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

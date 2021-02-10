@@ -4,6 +4,7 @@ enum class NavigationActions {
     CREATE,
     READ,
     UPDATE,
+    UPDATED,
     DELETE,
     ABOUT
 }

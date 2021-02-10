@@ -24,12 +24,13 @@ class NoteViewModel(
         } catch (e: Exception) {
             error.value = e
         }
-
     }
 
-    override fun saveNote(note: Note) {
+    override fun saveNote(note: Note, func: (String) -> Unit) {
         try {
-            repo.setNote(note)
+            repo.setNote(note) {
+                func.invoke(note.uid)
+            }
         } catch (e: Exception) {
             error.value = e
         }

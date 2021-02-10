@@ -5,7 +5,6 @@ import org.vimteam.notes.data.models.NoteDB
 import org.vimteam.notes.data.models.NoteDBListElement
 import org.vimteam.notes.domain.models.Note
 import org.vimteam.notes.domain.models.NotesListElement
-import java.sql.Date
 
 object NoteMapper {
 
@@ -24,7 +23,7 @@ object NoteMapper {
         return Note(
             uid = noteDB.uid,
             timestamp = noteDB.timestamp,
-            tags = noteDB.tags.split(", ") as Array<String>,
+            tags = noteDB.tags.split(", ").toTypedArray(),
             mark = MarkMapper.toMark(noteDB.mark),
             title = noteDB.title,
             noteText = noteDB.noteText

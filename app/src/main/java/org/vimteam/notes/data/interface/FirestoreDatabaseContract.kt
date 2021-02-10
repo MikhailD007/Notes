@@ -12,8 +12,8 @@ interface FirestoreDatabaseContract {
     fun getNoteDB(noteDBUid: String, func: (NoteDB?) -> Unit)
 
     @Throws(Exception::class)
-    fun setNoteDB(noteDB: NoteDB)
+    fun setNoteDB(noteDB: NoteDB, func: (Boolean)->Unit)
 
     @Throws(Exception::class)
-    fun deleteNoteDB(noteDBUid: String)
+    fun deleteNoteDB(noteDBUid: String, func: (Boolean)->Unit)
 }

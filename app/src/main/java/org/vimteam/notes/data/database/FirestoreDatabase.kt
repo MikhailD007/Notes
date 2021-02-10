@@ -31,13 +31,15 @@ class FirestoreDatabase : FirestoreDatabaseContract {
             .addOnFailureListener { throw it }
     }
 
-    override fun setNoteDB(noteDB: NoteDB) {
+    override fun setNoteDB(noteDB: NoteDB, func: (Boolean)->Unit) {
         firestoreDB.collection(notesCollection).document(noteDB.uid).set(noteDB)
+            .addOnSuccessListener { func.invoke(true) }
             .addOnFailureListener { throw it }
     }
 
-    override fun deleteNoteDB(noteDBUid: String) {
+    override fun deleteNoteDB(noteDBUid: String, func: (Boolean)->Unit) {
         firestoreDB.collection(notesCollection).document(noteDBUid).delete()
+            .addOnSuccessListener { func.invoke(true) }
             .addOnFailureListener { throw it }
     }
 

@@ -20,6 +20,7 @@ import org.vimteam.notes.base.formatTimestamp
 import org.vimteam.notes.domain.contracts.NavigationContract
 import org.vimteam.notes.domain.contracts.NoteContract
 import org.vimteam.notes.domain.models.Mark
+import org.vimteam.notes.domain.models.NavigationActions
 import org.vimteam.notes.domain.models.Note
 import java.util.*
 
@@ -115,6 +116,13 @@ class NoteEditFragment : Fragment() {
         noteViewModel.error.observe(viewLifecycleOwner) {
             Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_LONG).show()
         }
+        navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
+            if (navigationViewModel.navigationAction.value == NavigationActions.UPDATED) {
+                activity?.supportFragmentManager?.beginTransaction()
+                    ?.remove(this)?.commitAllowingStateLoss()
+                navigationViewModel.showNote(NavigationActions.READ, navigationViewModel.getNoteUid())
+            }
+        }
     }
 
     private fun initDateTimePicker(title: String, isThemeDark: Boolean = false) {
@@ -173,7 +181,9 @@ class NoteEditFragment : Fragment() {
             mark = Mark.NONE,
             title = "Sample Note",
             noteText = "Lorem ipsum"
-        ))
+        )){
+            navigationViewModel.showNote(NavigationActions.UPDATED, it)
+        }
     }
 
 }

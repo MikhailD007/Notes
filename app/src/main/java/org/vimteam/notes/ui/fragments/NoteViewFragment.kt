@@ -66,6 +66,7 @@ class NoteViewFragment : Fragment() {
 
     private fun setObservers(view: View) {
         noteViewModel.note.observe(viewLifecycleOwner) {
+            if (it == null) return@observe
             view.titleTextView.text = it.title
             view.dateTextView.text = it.timestamp.formatTimestamp()
             view.tagsTextView.text = it.tags.toSimpleString()

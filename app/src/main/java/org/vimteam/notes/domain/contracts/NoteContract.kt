@@ -12,7 +12,7 @@ interface NoteContract {
 
         abstract fun showNote(noteUid: String)
 
-        abstract fun saveNote(note: Note)
+        abstract fun saveNote(note: Note, func: (String) -> Unit)
 
     }
 

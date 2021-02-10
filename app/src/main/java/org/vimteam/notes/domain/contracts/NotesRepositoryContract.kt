@@ -12,9 +12,9 @@ interface NotesRepositoryContract {
     fun getNote(noteUid: String, func: (Note?) -> Unit)
 
     @Throws(Exception::class)
-    fun setNote(note: Note)
+    fun setNote(note: Note, func: (Boolean)->Unit)
 
     @Throws(Exception::class)
-    fun deleteNote(noteUid: String)
+    fun deleteNote(noteUid: String, func: (Boolean)->Unit)
 
 }

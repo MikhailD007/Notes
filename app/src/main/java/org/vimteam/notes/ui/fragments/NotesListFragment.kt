@@ -60,6 +60,7 @@ class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
         }
         navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
             if (it == DELETE) notesListViewModel.deleteNote(notesAdapter.getSelectedNoteUid())
+            if (it == UPDATED) notesListViewModel.getNotesList()
         }
     }
 

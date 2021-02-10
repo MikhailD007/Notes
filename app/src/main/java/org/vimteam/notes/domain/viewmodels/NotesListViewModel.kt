@@ -39,15 +39,16 @@ class NotesListViewModel(
 
     override fun deleteNote(noteUid: String) {
         try {
-            repo.deleteNote(noteUid)
+            repo.deleteNote(noteUid) {
+                val note = notesList.value?.find {
+                    it.uid == noteUid
+                }
+                if (note != null) notesList.value?.remove(note)
+            }
         } catch (e: Exception) {
             error.value = e
             return
         }
-        val note = notesList.value?.find {
-            it.uid == noteUid
-        }
-        if (note != null) notesList.value?.remove(note)
     }
 
 }
