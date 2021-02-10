@@ -16,8 +16,8 @@ import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
 import org.vimteam.notes.base.formatTimestamp
-import org.vimteam.notes.domain.viewmodels.NavigationViewModel
-import org.vimteam.notes.domain.viewmodels.NoteViewModel
+import org.vimteam.notes.domain.contracts.NavigationContract
+import org.vimteam.notes.domain.contracts.NoteContract
 import java.util.*
 
 
@@ -35,8 +35,8 @@ class NoteEditFragment : Fragment() {
         }
     }
 
-    private val navigationViewModel by sharedViewModel<NavigationViewModel>()
-    private val noteViewModel by viewModel<NoteViewModel>()
+    private val navigationViewModel by sharedViewModel<NavigationContract.ViewModel>()
+    private val noteViewModel by viewModel<NoteContract.ViewModel>()
 
     private var noteUid: String = ""
     private var spannedLength: Int = 0

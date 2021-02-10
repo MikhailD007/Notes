@@ -3,6 +3,8 @@ package org.vimteam.notes
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.experimental.builder.factoryBy
+import org.vimteam.notes.data.`interface`.FirestoreDatabaseContract
+import org.vimteam.notes.data.database.FirestoreDatabase
 import org.vimteam.notes.data.repositories.NotesRepository
 import org.vimteam.notes.domain.contracts.*
 import org.vimteam.notes.domain.viewmodels.NavigationViewModel
@@ -15,9 +17,9 @@ object MainModule {
 
         factoryBy<ResourcesProviderContract, ResourcesProvider>()
 
-        //single { NoteDB() }
+        single<FirestoreDatabaseContract> { FirestoreDatabase() }
 
-        factoryBy<NotesRepositoryContract, NotesRepository>()
+        factory<NotesRepositoryContract> { NotesRepository(get()) }
 
         viewModel<NotesListContract.ViewModel> { NotesListViewModel(get(), get()) }
         viewModel<NoteContract.ViewModel> { NoteViewModel(get(), get()) }

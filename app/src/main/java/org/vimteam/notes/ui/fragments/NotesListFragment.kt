@@ -9,6 +9,7 @@ import kotlinx.android.synthetic.main.fragment_notes_list.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
+import org.vimteam.notes.domain.contracts.NavigationContract
 import org.vimteam.notes.domain.contracts.NotesListContract
 import org.vimteam.notes.domain.models.NavigationActions
 import org.vimteam.notes.domain.models.NavigationActions.*
@@ -19,7 +20,7 @@ import org.vimteam.notes.ui.interfaces.NotesListAdapterEventHandler
 class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
 
     private val notesListViewModel by viewModel<NotesListContract.ViewModel>()
-    private val navigationViewModel by sharedViewModel<NavigationViewModel>()
+    private val navigationViewModel by sharedViewModel<NavigationContract.ViewModel>()
     private val notesAdapter: NotesListAdapter = NotesListAdapter(ArrayList(), this)
 
     override fun onCreate(savedInstanceState: Bundle?) {

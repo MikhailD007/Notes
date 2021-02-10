@@ -11,6 +11,7 @@ interface NotesListContract {
     abstract class ViewModel : androidx.lifecycle.ViewModel() {
 
         abstract val notesList: LiveData<ArrayList<NotesListElement>>
+        abstract val error: LiveData<java.lang.Exception>
 
         @Throws(Exception::class)
         abstract fun getNotesList()

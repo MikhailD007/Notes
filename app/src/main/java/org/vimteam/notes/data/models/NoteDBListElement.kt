@@ -1,21 +1,19 @@
 package org.vimteam.notes.data.models
 
 import org.vimteam.notes.base.formatTimestamp
-import org.vimteam.notes.domain.models.Note
 
-data class NoteDB (
-    val uid: String,
+data class NoteDBListElement(
+    var uid: String,
     var timestamp: Long,
     var tags: String,
     var mark: Int,
-    var title: String,
-    var noteText: String
+    var title: String
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as NoteDB
+        other as NoteDBListElement
 
         if (uid != other.uid) return false
 

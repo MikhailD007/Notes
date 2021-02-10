@@ -15,5 +15,7 @@ interface NavigationContract {
         @Throws(Exception::class)
         abstract fun showNote(navigationAction: NavigationActions, noteUid: String)
 
+        abstract fun getNoteUid(): String
+
     }
 }

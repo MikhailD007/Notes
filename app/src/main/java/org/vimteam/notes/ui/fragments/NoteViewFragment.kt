@@ -9,6 +9,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
 import org.vimteam.notes.base.formatTimestamp
 import org.vimteam.notes.base.toSimpleString
+import org.vimteam.notes.domain.contracts.NavigationContract
 import org.vimteam.notes.domain.contracts.NoteContract
 import org.vimteam.notes.domain.models.NavigationActions
 import org.vimteam.notes.domain.viewmodels.NavigationViewModel
@@ -28,7 +29,7 @@ class NoteViewFragment : Fragment() {
     }
 
     private val noteViewModel by viewModel<NoteContract.ViewModel>()
-    private val navigationViewModel by sharedViewModel<NavigationViewModel>()
+    private val navigationViewModel by sharedViewModel<NavigationContract.ViewModel>()
 
     private var noteUid: String = ""
 

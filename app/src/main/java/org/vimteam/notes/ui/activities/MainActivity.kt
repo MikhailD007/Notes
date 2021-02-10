@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
+import org.vimteam.notes.domain.contracts.NavigationContract
 import org.vimteam.notes.domain.models.NavigationActions.*
 import org.vimteam.notes.domain.viewmodels.NavigationViewModel
 import org.vimteam.notes.ui.fragments.AboutFragment
@@ -24,7 +25,7 @@ import org.vimteam.notes.ui.fragments.NotesListFragment
 class MainActivity : AppCompatActivity() {
 
     private var twoPane = false
-    private val navigationViewModel by viewModel<NavigationViewModel>()
+    private val navigationViewModel by viewModel<NavigationContract.ViewModel>()
     private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

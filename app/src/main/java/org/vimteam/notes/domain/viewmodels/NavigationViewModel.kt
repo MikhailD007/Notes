@@ -18,5 +18,5 @@ class NavigationViewModel() : NavigationContract.ViewModel() {
         this.navigationAction.value = navigationAction
     }
 
-    fun getNoteUid() = noteUid
+    override fun getNoteUid() = noteUid
 }
