@@ -5,7 +5,6 @@ import org.vimteam.notes.domain.contracts.NoteContract
 import org.vimteam.notes.domain.contracts.NotesRepositoryContract
 import org.vimteam.notes.domain.contracts.ResourcesProviderContract
 import org.vimteam.notes.domain.models.Note
-import java.lang.Exception
 
 class NoteViewModel(
     private val repo: NotesRepositoryContract,
@@ -16,15 +15,25 @@ class NoteViewModel(
     override val error = MutableLiveData<Exception>()
 
     override fun showNote(noteUid: String) {
-        repo.getNote(noteUid) {
-            if (it == null) {
-                error.value = Exception("No such note")
-            } else note.value = it
+        try {
+            repo.getNote(noteUid) {
+                if (it == null) {
+                    error.value = Exception(res.getString("no_note_found"))
+                } else note.value = it
+            }
+        } catch (e: Exception) {
+            error.value = e
         }
+
     }
 
-    override fun saveNote(noteUid: String) {
-        TODO("Not yet implemented")
+    override fun saveNote(note: Note) {
+        try {
+            repo.setNote(note)
+        } catch (e: Exception) {
+            error.value = e
+        }
+
     }
 
     init {

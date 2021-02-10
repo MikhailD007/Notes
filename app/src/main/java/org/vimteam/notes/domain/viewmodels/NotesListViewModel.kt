@@ -13,13 +13,20 @@ class NotesListViewModel(
 ) : NotesListContract.ViewModel() {
 
     override val notesList = MutableLiveData<ArrayList<NotesListElement>>()
+    override val error = MutableLiveData<Exception>()
 
     init {
         notesList.value = ArrayList()
     }
 
     override fun getNotesList() {
-        notesList.value = repo.getNotesList()
+        try {
+            repo.getNotesList() {
+                notesList.value = it
+            }
+        } catch (e: Exception) {
+            error.value = e
+        }
     }
 
     override fun getNotesList(filterByMark: Mark) {
@@ -31,6 +38,12 @@ class NotesListViewModel(
     }
 
     override fun deleteNote(noteUid: String) {
+        try {
+            repo.deleteNote(noteUid)
+        } catch (e: Exception) {
+            error.value = e
+            return
+        }
         val note = notesList.value?.find {
             it.uid == noteUid
         }

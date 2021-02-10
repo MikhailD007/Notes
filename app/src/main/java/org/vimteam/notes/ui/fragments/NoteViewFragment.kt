@@ -2,6 +2,7 @@ package org.vimteam.notes.ui.fragments
 
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_note_view.view.*
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -12,7 +13,6 @@ import org.vimteam.notes.base.toSimpleString
 import org.vimteam.notes.domain.contracts.NavigationContract
 import org.vimteam.notes.domain.contracts.NoteContract
 import org.vimteam.notes.domain.models.NavigationActions
-import org.vimteam.notes.domain.viewmodels.NavigationViewModel
 
 class NoteViewFragment : Fragment() {
 
@@ -60,13 +60,20 @@ class NoteViewFragment : Fragment() {
     }
 
     private fun initView(view: View) {
+        setObservers(view)
+        noteViewModel.showNote(noteUid)
+    }
+
+    private fun setObservers(view: View) {
         noteViewModel.note.observe(viewLifecycleOwner) {
             view.titleTextView.text = it.title
             view.dateTextView.text = it.timestamp.formatTimestamp()
             view.tagsTextView.text = it.tags.toSimpleString()
             view.noteTextTextView.text = it.noteText
         }
-        noteViewModel.showNote(noteUid)
+        noteViewModel.error.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_LONG).show()
+        }
         navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
             if (it == NavigationActions.DELETE) activity?.supportFragmentManager?.beginTransaction()
                 ?.remove(this)?.commitAllowingStateLoss()

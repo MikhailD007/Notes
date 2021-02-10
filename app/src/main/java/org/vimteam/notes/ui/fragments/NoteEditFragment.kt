@@ -6,6 +6,7 @@ import android.text.Spanned
 import android.text.TextWatcher
 import android.text.style.ImageSpan
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.chip.ChipDrawable
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
@@ -18,6 +19,8 @@ import org.vimteam.notes.R
 import org.vimteam.notes.base.formatTimestamp
 import org.vimteam.notes.domain.contracts.NavigationContract
 import org.vimteam.notes.domain.contracts.NoteContract
+import org.vimteam.notes.domain.models.Mark
+import org.vimteam.notes.domain.models.Note
 import java.util.*
 
 
@@ -96,27 +99,33 @@ class NoteEditFragment : Fragment() {
                 "DatePickerDialog"
             )
         }
+        setObservers()
         if (noteUid == "") return
+        noteViewModel.showNote(noteUid)
+    }
+
+    private fun setObservers() {
         noteViewModel.note.observe(viewLifecycleOwner) {
+            if (it == null) return@observe
             titleEditText.setText(it.title)
             dateEditText.setText(it.timestamp.formatTimestamp())
-            dateEditText.tag = it.timestamp
+            dateEditText.tag = it.tags
             noteEditText.setText(it.noteText)
         }
-        noteViewModel.showNote(noteUid)
+        noteViewModel.error.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun initDateTimePicker(title: String, isThemeDark: Boolean = false) {
         datePickerDialog = DatePickerDialog.newInstance { _, year, monthOfYear, dayOfMonth ->
-            dateEditText.setText(
-                localeDateToString(
-                    LocalDate(
-                        year,
-                        monthOfYear + 1,
-                        dayOfMonth
-                    )
-                )
+            val date = LocalDate(
+                year,
+                monthOfYear + 1,
+                dayOfMonth
             )
+            dateEditText.setText(date.toString())
+            dateEditText.tag = date.toDateTimeAtStartOfDay().millis
             dateTextInputLayout.error = null
         }
         datePickerDialog.isThemeDark = isThemeDark
@@ -157,7 +166,14 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun saveNote() {
-        //TODO save note using NotesViewModel
+        noteViewModel.saveNote(Note(
+            uid = UUID.randomUUID().toString(),
+            timestamp = dateEditText.tag as Long,
+            tags = arrayOf("tag1", "tag2", "tag3"),
+            mark = Mark.NONE,
+            title = "Sample Note",
+            noteText = "Lorem ipsum"
+        ))
     }
 
 }

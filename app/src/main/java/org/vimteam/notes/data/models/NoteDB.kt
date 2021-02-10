@@ -5,11 +5,11 @@ import org.vimteam.notes.domain.models.Note
 
 data class NoteDB (
     val uid: String,
-    var timestamp: Long,
-    var tags: String,
-    var mark: Int,
-    var title: String,
-    var noteText: String
+    val timestamp: Long,
+    val tags: String,
+    val mark: Int,
+    val title: String,
+    val noteText: String
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

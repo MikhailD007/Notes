@@ -11,9 +11,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
 import org.vimteam.notes.domain.contracts.NavigationContract
 import org.vimteam.notes.domain.contracts.NotesListContract
-import org.vimteam.notes.domain.models.NavigationActions
 import org.vimteam.notes.domain.models.NavigationActions.*
-import org.vimteam.notes.domain.viewmodels.NavigationViewModel
 import org.vimteam.notes.ui.adapters.NotesListAdapter
 import org.vimteam.notes.ui.interfaces.NotesListAdapterEventHandler
 
@@ -44,17 +42,24 @@ class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
 
     private fun initView() {
         notesListRecyclerView.adapter = notesAdapter
+        setObservers()
+        notesListViewModel.getNotesList()
+        addNoteFloatingActionButton.setOnClickListener {
+            navigationViewModel.showNote(CREATE, "")
+        }
+    }
+
+    private fun setObservers() {
         notesListViewModel.notesList.observe(viewLifecycleOwner) {
             notesAdapter.notes.clear()
             notesAdapter.notes.addAll(it)
             notesAdapter.notifyDataSetChanged()
         }
-        notesListViewModel.getNotesList()
+        notesListViewModel.error.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_LONG).show()
+        }
         navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
             if (it == DELETE) notesListViewModel.deleteNote(notesAdapter.getSelectedNoteUid())
-        }
-        addNoteFloatingActionButton.setOnClickListener {
-            navigationViewModel.showNote(CREATE, "")
         }
     }
 

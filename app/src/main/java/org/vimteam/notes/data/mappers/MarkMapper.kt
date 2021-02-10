@@ -6,4 +6,6 @@ object MarkMapper {
 
     fun toDB(mark: Mark) = mark.ordinal
 
+    fun toMark(value: Int) = Mark.values()[value]
+
 }

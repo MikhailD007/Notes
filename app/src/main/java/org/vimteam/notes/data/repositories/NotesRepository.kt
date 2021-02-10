@@ -2,19 +2,16 @@ package org.vimteam.notes.data.repositories
 
 import org.vimteam.notes.data.`interface`.FirestoreDatabaseContract
 import org.vimteam.notes.data.mappers.NoteMapper
-import org.vimteam.notes.data.models.NoteDBListElement
 import org.vimteam.notes.domain.contracts.NotesRepositoryContract
-import org.vimteam.notes.domain.models.Mark
 import org.vimteam.notes.domain.models.Note
 import org.vimteam.notes.domain.models.NotesListElement
-import java.util.*
 import kotlin.collections.ArrayList
 
 class NotesRepository(private val db: FirestoreDatabaseContract) : NotesRepositoryContract {
 
     override fun getNotesList(func: (ArrayList<NotesListElement>) -> Unit) {
         db.getNoteDBList() {
-            func.invoke(it.map(NoteMapper::toListElementModel) as ArrayList<NotesListElement>)
+            func.invoke(it.map(NoteMapper::toNotesListElement) as ArrayList<NotesListElement>)
         }
 
 /*        val notesList: ArrayList<NotesListElement> = ArrayList()
@@ -71,5 +68,13 @@ class NotesRepository(private val db: FirestoreDatabaseContract) : NotesReposito
             tags = arrayOf("tag1", "some tag", "home", "todo", "123456", "Elena", "warning"),
             mark = Mark.CONTACTS
         )*/
+    }
+
+    override fun setNote(note: Note) {
+        db.setNoteDB(NoteMapper.toNoteDB(note))
+    }
+
+    override fun deleteNote(noteUid: String) {
+        db.deleteNoteDB(noteUid)
     }
 }

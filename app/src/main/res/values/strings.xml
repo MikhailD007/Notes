@@ -18,4 +18,5 @@
     <string name="save_note">Save note</string>
     <string name="cancel">Cancel</string>
     <string name="tags_hint">Tags separated with comma</string>
+    <string name="no_note_found">No such note found</string>
 </resources>

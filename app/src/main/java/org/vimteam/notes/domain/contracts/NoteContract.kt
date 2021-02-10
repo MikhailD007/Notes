@@ -10,11 +10,9 @@ interface NoteContract {
         abstract val note: LiveData<Note>
         abstract val error: LiveData<java.lang.Exception>
 
-        @Throws(Exception::class)
         abstract fun showNote(noteUid: String)
 
-        @Throws(Exception::class)
-        abstract fun saveNote(noteUid: String)
+        abstract fun saveNote(note: Note)
 
     }
 
