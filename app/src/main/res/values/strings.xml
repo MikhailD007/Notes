@@ -19,4 +19,6 @@
     <string name="cancel">Cancel</string>
     <string name="tags_hint">Tags separated with comma</string>
     <string name="no_note_found">No such note found</string>
+    <string name="no_title">Note should have a title</string>
+    <string name="no_date">Specify a date of note</string>
 </resources>

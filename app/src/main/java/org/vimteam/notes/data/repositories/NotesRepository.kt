@@ -1,6 +1,6 @@
 package org.vimteam.notes.data.repositories
 
-import org.vimteam.notes.data.`interface`.FirestoreDatabaseContract
+import org.vimteam.notes.data.interfaces.FirestoreDatabaseContract
 import org.vimteam.notes.data.mappers.NoteMapper
 import org.vimteam.notes.domain.contracts.NotesRepositoryContract
 import org.vimteam.notes.domain.models.Note

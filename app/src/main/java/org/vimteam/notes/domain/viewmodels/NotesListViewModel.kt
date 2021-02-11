@@ -1,5 +1,6 @@
 package org.vimteam.notes.domain.viewmodels
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.vimteam.notes.domain.contracts.NotesListContract
 import org.vimteam.notes.domain.contracts.NotesRepositoryContract
@@ -43,7 +44,10 @@ class NotesListViewModel(
                 val note = notesList.value?.find {
                     it.uid == noteUid
                 }
-                if (note != null) notesList.value?.remove(note)
+                if (note != null) {
+                    notesList.value?.remove(note)
+                    notesList.value = notesList.value
+                }
             }
         } catch (e: Exception) {
             error.value = e

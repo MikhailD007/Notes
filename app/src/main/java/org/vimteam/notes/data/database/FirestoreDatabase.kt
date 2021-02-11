@@ -3,7 +3,7 @@ package org.vimteam.notes.data.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
-import org.vimteam.notes.data.`interface`.FirestoreDatabaseContract
+import org.vimteam.notes.data.interfaces.FirestoreDatabaseContract
 import org.vimteam.notes.data.models.NoteDB
 import org.vimteam.notes.data.models.NoteDBListElement
 

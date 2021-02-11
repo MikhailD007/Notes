@@ -3,7 +3,7 @@ package org.vimteam.notes
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.experimental.builder.factoryBy
-import org.vimteam.notes.data.`interface`.FirestoreDatabaseContract
+import org.vimteam.notes.data.interfaces.FirestoreDatabaseContract
 import org.vimteam.notes.data.database.FirestoreDatabase
 import org.vimteam.notes.data.repositories.NotesRepository
 import org.vimteam.notes.domain.contracts.*

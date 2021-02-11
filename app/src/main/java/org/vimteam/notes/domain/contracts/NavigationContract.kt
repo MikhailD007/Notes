@@ -13,7 +13,7 @@ interface NavigationContract {
         abstract fun showAbout()
 
         @Throws(Exception::class)
-        abstract fun showNote(navigationAction: NavigationActions, noteUid: String)
+        abstract fun performAction(navigationAction: NavigationActions, noteUid: String)
 
         abstract fun getNoteUid(): String
 

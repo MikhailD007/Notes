@@ -45,7 +45,7 @@ class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
         setObservers()
         notesListViewModel.getNotesList()
         addNoteFloatingActionButton.setOnClickListener {
-            navigationViewModel.showNote(CREATE, "")
+            navigationViewModel.performAction(CREATE, "")
         }
     }
 
@@ -83,7 +83,7 @@ class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.aboutMenuItem -> navigationViewModel.showAbout()
-            R.id.addNoteMenuItem -> navigationViewModel.showNote(CREATE, "")
+            R.id.addNoteMenuItem -> navigationViewModel.performAction(CREATE, "")
         }
         return super.onOptionsItemSelected(item)
     }
@@ -103,16 +103,13 @@ class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.editNoteMenuItem -> navigationViewModel.showNote(
-                UPDATE,
-                notesAdapter.getSelectedNoteUid()
-            )
-            R.id.deleteNoteMenuItem -> notesListViewModel.deleteNote(notesAdapter.getSelectedNoteUid())
+            R.id.editNoteMenuItem -> navigationViewModel.performAction(UPDATE, notesAdapter.getSelectedNoteUid())
+            R.id.deleteNoteMenuItem -> navigationViewModel.performAction(DELETE, notesAdapter.getSelectedNoteUid())
         }
         return super.onContextItemSelected(item)
     }
 
     override fun notesListItemClick(v: View, noteUid: String) {
-        navigationViewModel.showNote(READ, noteUid)
+        navigationViewModel.performAction(READ, noteUid)
     }
 }

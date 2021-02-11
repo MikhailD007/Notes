@@ -26,6 +26,13 @@ class NoteViewModel(
         }
     }
 
+    override fun validateNote(note: Note, func: (Map<String, String>) -> Unit) {
+        val errorsMap = mutableMapOf<String, String>()
+        if (note.title.isEmpty()) errorsMap["title"] = res.getString("no_title")
+        if (note.timestamp == null) errorsMap["date"] = res.getString("no_date")
+        func.invoke(errorsMap)
+    }
+
     override fun saveNote(note: Note, func: (String) -> Unit) {
         try {
             repo.setNote(note) {

@@ -1,4 +1,4 @@
-package org.vimteam.notes.data.`interface`
+package org.vimteam.notes.data.interfaces
 
 import org.vimteam.notes.data.models.NoteDB
 import org.vimteam.notes.data.models.NoteDBListElement

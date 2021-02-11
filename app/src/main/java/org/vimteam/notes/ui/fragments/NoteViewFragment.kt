@@ -88,11 +88,8 @@ class NoteViewFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.editNoteMenuItem -> navigationViewModel.showNote(NavigationActions.UPDATE, noteUid)
-            R.id.deleteNoteMenuItem -> navigationViewModel.showNote(
-                NavigationActions.DELETE,
-                noteUid
-            )
+            R.id.editNoteMenuItem -> navigationViewModel.performAction(NavigationActions.UPDATE, noteUid)
+            R.id.deleteNoteMenuItem -> navigationViewModel.performAction(NavigationActions.DELETE, noteUid)
         }
         return super.onOptionsItemSelected(item)
     }

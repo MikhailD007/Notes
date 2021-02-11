@@ -54,7 +54,7 @@ class NoteEditFragment : Fragment() {
         if (arguments == null || !arguments.containsKey(NOTE_KEY)) {
             return
         } else {
-            val noteUid = arguments.getString(NOTE_KEY, "")
+            noteUid = arguments.getString(NOTE_KEY, "")
         }
     }
 
@@ -75,18 +75,14 @@ class NoteEditFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.removeItem(R.id.editNoteMenuItem)
         menu.removeItem(R.id.deleteNoteMenuItem)
-        if (menu.findItem(R.id.saveNoteMenuItem) == null) inflater.inflate(
-            R.menu.note_edit_menu,
-            menu
-        )
+        if (menu.findItem(R.id.saveNoteMenuItem) == null) inflater.inflate(R.menu.note_edit_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.saveNoteMenuItem -> saveNote()
-            R.id.cancelMenuItem -> activity?.supportFragmentManager?.beginTransaction()
-                ?.remove(this)?.commitAllowingStateLoss()
+            R.id.cancelMenuItem -> activity?.supportFragmentManager?.beginTransaction()?.remove(this)?.commitAllowingStateLoss()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -95,10 +91,7 @@ class NoteEditFragment : Fragment() {
         initDateTimePicker(getString(R.string.date))
         initTagsInputText()
         dateEditText.setOnFocusChangeListener { _, b ->
-            if (b) datePickerDialog.show(
-                childFragmentManager,
-                "DatePickerDialog"
-            )
+            if (b) datePickerDialog.show(childFragmentManager, "DatePickerDialog")
         }
         setObservers()
         if (noteUid == "") return
@@ -118,20 +111,15 @@ class NoteEditFragment : Fragment() {
         }
         navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
             if (navigationViewModel.navigationAction.value == NavigationActions.UPDATED) {
-                activity?.supportFragmentManager?.beginTransaction()
-                    ?.remove(this)?.commitAllowingStateLoss()
-                navigationViewModel.showNote(NavigationActions.READ, navigationViewModel.getNoteUid())
+                activity?.supportFragmentManager?.beginTransaction()?.remove(this)?.commitAllowingStateLoss()
+                navigationViewModel.performAction(NavigationActions.READ, navigationViewModel.getNoteUid())
             }
         }
     }
 
     private fun initDateTimePicker(title: String, isThemeDark: Boolean = false) {
         datePickerDialog = DatePickerDialog.newInstance { _, year, monthOfYear, dayOfMonth ->
-            val date = LocalDate(
-                year,
-                monthOfYear + 1,
-                dayOfMonth
-            )
+            val date = LocalDate(year, monthOfYear + 1, dayOfMonth)
             dateEditText.setText(date.toString())
             dateEditText.tag = date.toDateTimeAtStartOfDay().millis
             dateTextInputLayout.error = null
@@ -144,28 +132,19 @@ class NoteEditFragment : Fragment() {
     private fun initTagsInputText() {
         tagsEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                if (s == null) return
+                if (s == null || s.isEmpty()) return
                 if (s.toString().substring(s.length - 1) == ",") {
-                    val chip: ChipDrawable =
-                        ChipDrawable.createFromResource(requireContext(), R.xml.chip)
+                    val chip: ChipDrawable = ChipDrawable.createFromResource(requireContext(), R.xml.chip)
                     chip.text = s.toString().substring(spannedLength, s.length - 1)
                     chip.setBounds(0, 0, chip.intrinsicWidth, chip.intrinsicHeight)
                     val span = ImageSpan(chip)
-                    s.setSpan(
-                        span,
-                        spannedLength,
-                        s.length - 1,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
+                    s.setSpan(span, spannedLength, s.length - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                     spannedLength = s.length
                 }
             }
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
     }
 
@@ -174,16 +153,44 @@ class NoteEditFragment : Fragment() {
     }
 
     private fun saveNote() {
-        noteViewModel.saveNote(Note(
-            uid = UUID.randomUUID().toString(),
+        var tagsString = tagsEditText.text.toString()
+        if (tagsString.endsWith(",")) tagsString = tagsString.substring(0, tagsString.length - 1)
+        val tags = tagsString.split(",").toTypedArray()
+        val note = Note(
+            uid = if (noteUid == "") UUID.randomUUID().toString() else noteUid,
             timestamp = dateEditText.tag as Long,
-            tags = arrayOf("tag1", "tag2", "tag3"),
-            mark = Mark.NONE,
-            title = "Sample Note",
-            noteText = "Lorem ipsum"
-        )){
-            navigationViewModel.showNote(NavigationActions.UPDATED, it)
+            tags = tags,
+            mark = when (markToggleButtonGroup.checkedButtonId) {
+                R.id.importantMarkButton -> Mark.IMPORTANT
+                R.id.valueMarkButton -> Mark.VALUES
+                R.id.contactMarkButton -> Mark.CONTACTS
+                R.id.todoMarkButton -> Mark.TODO
+                else -> Mark.NONE
+            },
+            title = titleEditText.text.toString(),
+            noteText = noteEditText.text.toString()
+        )
+        noteViewModel.validateNote(note) {
+            if (it.isEmpty()) {
+                noteViewModel.saveNote(note) {
+                    navigationViewModel.performAction(NavigationActions.UPDATED, it)
+                }
+            }
+            setValidationErrors(it)
         }
     }
 
+    private fun setValidationErrors(errorsMap: Map<String, String>) {
+        if (errorsMap.isEmpty()) {
+            dateTextInputLayout.error = ""
+            titleTextInputLayout.error = ""
+        } else {
+            for ((key, value) in errorsMap) {
+                when (key) {
+                    "date" -> dateTextInputLayout.error = value
+                    "title" -> titleTextInputLayout.error = value
+                }
+            }
+        }
+    }
 }

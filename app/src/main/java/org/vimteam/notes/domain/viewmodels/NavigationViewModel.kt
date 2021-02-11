@@ -13,7 +13,7 @@ class NavigationViewModel() : NavigationContract.ViewModel() {
         navigationAction.value = NavigationActions.ABOUT
     }
 
-    override fun showNote(navigationAction: NavigationActions, noteUid: String) {
+    override fun performAction(navigationAction: NavigationActions, noteUid: String) {
         this.noteUid = noteUid
         this.navigationAction.value = navigationAction
     }
