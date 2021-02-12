@@ -1,11 +1,11 @@
 package org.vimteam.notes
 
-import android.app.Application
+import androidx.multidex.MultiDexApplication
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
-class App: Application() {
+class App : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()

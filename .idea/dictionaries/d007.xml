@@ -2,6 +2,8 @@
   <dictionary name="d007">
     <words>
       <w>crashlitics</w>
+      <w>firestore</w>
+      <w>koin</w>
     </words>
   </dictionary>
 </component>
