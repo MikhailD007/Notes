@@ -6,14 +6,14 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_notes_list.view.*
 import org.vimteam.notes.R
 import org.vimteam.notes.base.inflate
+import org.vimteam.notes.domain.models.Mark.*
 import org.vimteam.notes.domain.models.NotesListElement
-import org.vimteam.notes.ui.interfaces.NotesListAdapterEventHandler
 import java.text.SimpleDateFormat
 import java.util.*
 
 class NotesListAdapter(
     val notes: ArrayList<NotesListElement>,
-    val fragment: NotesListAdapterEventHandler
+    val fragment: EventHandler
 ) : RecyclerView.Adapter<NotesListAdapter.NoteViewHolder>() {
 
     private var selectedNoteUid: String = ""
@@ -54,6 +54,7 @@ class NotesListAdapter(
             view.dateTextView.text =
                 SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(note.timestamp)
             view.tagsTextView.text = note.tags
+            view.markImageView.setImageResource(note.mark.resourceId)
         }
 
         private fun registerContextMenu() {
@@ -63,6 +64,16 @@ class NotesListAdapter(
             }
             fragment.registerContextMenu(itemView)
         }
+    }
+
+    //-------------------------------------------------------------------------------------------
+
+    interface EventHandler {
+
+        fun notesListItemClick(v: View, noteUid: String)
+
+        fun registerContextMenu(v: View)
+
     }
 
 }

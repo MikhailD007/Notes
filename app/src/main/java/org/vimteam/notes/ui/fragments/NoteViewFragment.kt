@@ -45,11 +45,7 @@ class NoteViewFragment : Fragment() {
         if (noteUid == "") return
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.fragment_note_view, container, false)
     }
@@ -57,6 +53,20 @@ class NoteViewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView(view)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        if (!navigationViewModel.twoPane) menu.clear()
+        if (menu.findItem(R.id.editNoteMenuItem) == null) inflater.inflate(R.menu.note_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.editNoteMenuItem -> navigationViewModel.performAction(NavigationActions.EDIT, noteUid)
+            R.id.deleteNoteMenuItem -> navigationViewModel.performAction(NavigationActions.QUERY_DELETE, noteUid)
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun initView(view: View) {
@@ -71,27 +81,15 @@ class NoteViewFragment : Fragment() {
             view.dateTextView.text = it.timestamp.formatTimestamp()
             view.tagsTextView.text = it.tags.toSimpleString()
             view.noteTextTextView.text = it.noteText
+            view.markImageView.setImageResource(it.mark.resourceId)
         }
         noteViewModel.error.observe(viewLifecycleOwner) {
             Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_LONG).show()
         }
         navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
-            if (it == NavigationActions.DELETE) activity?.supportFragmentManager?.beginTransaction()
+            if (it == NavigationActions.DELETED) activity?.supportFragmentManager?.beginTransaction()
                 ?.remove(this)?.commitAllowingStateLoss()
+            if (it == NavigationActions.UPDATED) if (noteUid.isNotEmpty()) noteViewModel.showNote(noteUid)
         }
     }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (menu.findItem(R.id.editNoteMenuItem) == null) inflater.inflate(R.menu.note_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.editNoteMenuItem -> navigationViewModel.performAction(NavigationActions.UPDATE, noteUid)
-            R.id.deleteNoteMenuItem -> navigationViewModel.performAction(NavigationActions.DELETE, noteUid)
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
 }

@@ -7,7 +7,9 @@ import org.vimteam.notes.domain.models.NavigationActions
 class NavigationViewModel() : NavigationContract.ViewModel() {
 
     override val navigationAction = MutableLiveData<NavigationActions>()
+    override var twoPane: Boolean = false
     private var noteUid: String = ""
+
 
     override fun showAbout() {
         navigationAction.value = NavigationActions.ABOUT
@@ -19,4 +21,5 @@ class NavigationViewModel() : NavigationContract.ViewModel() {
     }
 
     override fun getNoteUid() = noteUid
+
 }

@@ -13,9 +13,8 @@ import org.vimteam.notes.domain.contracts.NavigationContract
 import org.vimteam.notes.domain.contracts.NotesListContract
 import org.vimteam.notes.domain.models.NavigationActions.*
 import org.vimteam.notes.ui.adapters.NotesListAdapter
-import org.vimteam.notes.ui.interfaces.NotesListAdapterEventHandler
 
-class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
+class NotesListFragment : Fragment(), NotesListAdapter.EventHandler {
 
     private val notesListViewModel by viewModel<NotesListContract.ViewModel>()
     private val navigationViewModel by sharedViewModel<NavigationContract.ViewModel>()
@@ -26,11 +25,7 @@ class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
         if (savedInstanceState == null) setHasOptionsMenu(true)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.fragment_notes_list, container, false)
     }
@@ -38,30 +33,6 @@ class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initView()
-    }
-
-    private fun initView() {
-        notesListRecyclerView.adapter = notesAdapter
-        setObservers()
-        notesListViewModel.getNotesList()
-        addNoteFloatingActionButton.setOnClickListener {
-            navigationViewModel.performAction(CREATE, "")
-        }
-    }
-
-    private fun setObservers() {
-        notesListViewModel.notesList.observe(viewLifecycleOwner) {
-            notesAdapter.notes.clear()
-            notesAdapter.notes.addAll(it)
-            notesAdapter.notifyDataSetChanged()
-        }
-        notesListViewModel.error.observe(viewLifecycleOwner) {
-            Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_LONG).show()
-        }
-        navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
-            if (it == DELETE) notesListViewModel.deleteNote(notesAdapter.getSelectedNoteUid())
-            if (it == UPDATED) notesListViewModel.getNotesList()
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -88,28 +59,53 @@ class NotesListFragment : Fragment(), NotesListAdapterEventHandler {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun registerContextMenu(v: View) {
-        registerForContextMenu(v)
-    }
-
-    override fun onCreateContextMenu(
-        menu: ContextMenu,
-        v: View,
-        menuInfo: ContextMenu.ContextMenuInfo?
-    ) {
+    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo)
         requireActivity().menuInflater.inflate(R.menu.note_menu, menu)
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.editNoteMenuItem -> navigationViewModel.performAction(UPDATE, notesAdapter.getSelectedNoteUid())
-            R.id.deleteNoteMenuItem -> navigationViewModel.performAction(DELETE, notesAdapter.getSelectedNoteUid())
+            R.id.editNoteMenuItem -> navigationViewModel.performAction(EDIT, notesAdapter.getSelectedNoteUid())
+            R.id.deleteNoteMenuItem -> navigationViewModel.performAction(
+                QUERY_DELETE,
+                notesAdapter.getSelectedNoteUid()
+            )
         }
         return super.onContextItemSelected(item)
     }
 
+    override fun registerContextMenu(v: View) {
+        registerForContextMenu(v)
+    }
+
     override fun notesListItemClick(v: View, noteUid: String) {
         navigationViewModel.performAction(READ, noteUid)
+    }
+
+    private fun initView() {
+        notesListRecyclerView.adapter = notesAdapter
+        setObservers()
+        notesListViewModel.getNotesList()
+        addNoteFloatingActionButton.setOnClickListener {
+            navigationViewModel.performAction(CREATE, "")
+        }
+    }
+
+    private fun setObservers() {
+        notesListViewModel.notesList.observe(viewLifecycleOwner) {
+            notesAdapter.notes.clear()
+            notesAdapter.notes.addAll(it)
+            notesAdapter.notifyDataSetChanged()
+        }
+        notesListViewModel.error.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_LONG).show()
+        }
+        navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
+            if (it == DELETE) notesListViewModel.deleteNote(notesAdapter.getSelectedNoteUid()) {
+                navigationViewModel.performAction(DELETED,"")
+            }
+            if (it == UPDATED) notesListViewModel.getNotesList()
+        }
     }
 }

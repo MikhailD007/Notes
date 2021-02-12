@@ -1,6 +1,7 @@
 package org.vimteam.notes.domain.contracts
 
 import androidx.lifecycle.LiveData
+import org.vimteam.notes.domain.models.Mark
 import org.vimteam.notes.domain.models.Note
 
 interface NoteContract {
@@ -12,8 +13,8 @@ interface NoteContract {
 
         abstract fun showNote(noteUid: String)
 
-        abstract fun validateNote(note: Note, func: (Map<String,String>) -> Unit)
-        abstract fun saveNote(note: Note, func: (String) -> Unit)
+        abstract fun validateNote(timestamp: Any?, title: String): Map<String, String>
+        abstract fun saveNote(uid: String, timestamp: Any, tags: String, mark: Mark, title: String, noteText: String, func: (String) -> Unit)
 
     }
 

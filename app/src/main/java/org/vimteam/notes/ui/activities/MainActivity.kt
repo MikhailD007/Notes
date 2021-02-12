@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -15,18 +16,13 @@ import kotlinx.android.synthetic.main.content_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
 import org.vimteam.notes.domain.contracts.NavigationContract
+import org.vimteam.notes.domain.models.NavigationActions
 import org.vimteam.notes.domain.models.NavigationActions.*
-import org.vimteam.notes.domain.viewmodels.NavigationViewModel
-import org.vimteam.notes.ui.fragments.AboutFragment
-import org.vimteam.notes.ui.fragments.NoteEditFragment
-import org.vimteam.notes.ui.fragments.NoteViewFragment
-import org.vimteam.notes.ui.fragments.NotesListFragment
+import org.vimteam.notes.ui.fragments.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), LocalDialogFragment.ResultHandler {
 
-    private var twoPane = false
     private val navigationViewModel by viewModel<NavigationContract.ViewModel>()
-    private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,18 +35,21 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.popBackStack()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        this.menu = menu
-        return super.onCreateOptionsMenu(menu)
+    override fun onDialogResult(result: NavigationActions, noteUid: String) {
+        navigationViewModel.performAction(result, noteUid)
     }
 
     private fun initView() {
         setSupportActionBar(toolbar)
-        twoPane = secondFragmentContainer != null
         initDrawer(toolbar)
+        navigationViewModel.twoPane = secondFragmentContainer != null
         supportFragmentManager.beginTransaction()
-            .add(R.id.fragmentContainer, NotesListFragment())
+            .replace(R.id.fragmentContainer, NotesListFragment())
             .commitAllowingStateLoss()
+        setObservers()
+    }
+
+    private fun setObservers() {
         navigationViewModel.navigationAction.observe(this) {
             when (it) {
                 ABOUT -> showDetailFragment(AboutFragment())
@@ -58,7 +57,19 @@ class MainActivity : AppCompatActivity() {
                 READ -> if (navigationViewModel.getNoteUid() != "") showDetailFragment(
                     NoteViewFragment.newInstance(navigationViewModel.getNoteUid())
                 )
-                UPDATE -> if (navigationViewModel.getNoteUid() != "") showDetailFragment(
+                QUERY_DELETE -> if (navigationViewModel.getNoteUid() != "") showDialogFragment(
+                    LocalDialogFragment.newInstance(
+                        DELETE,
+                        navigationViewModel.getNoteUid()
+                    )
+                )
+                QUERY_UPDATE -> if (navigationViewModel.getNoteUid() != "") showDialogFragment(
+                    LocalDialogFragment.newInstance(
+                        UPDATE,
+                        navigationViewModel.getNoteUid()
+                    )
+                )
+                EDIT -> if (navigationViewModel.getNoteUid() != "") showDetailFragment(
                     NoteEditFragment.newInstance(navigationViewModel.getNoteUid())
                 )
                 else -> return@observe
@@ -87,12 +98,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDetailFragment(fragment: Fragment) {
-        val containerId = if (twoPane) R.id.secondFragmentContainer else R.id.fragmentContainer
-        if (!twoPane) menu?.clear()
+        val containerId = if (navigationViewModel.twoPane) R.id.secondFragmentContainer else R.id.fragmentContainer
         supportFragmentManager.beginTransaction()
             .add(containerId, fragment)
             .addToBackStack(null)
             .commitAllowingStateLoss()
+    }
+
+    private fun showDialogFragment(fragment: DialogFragment) {
+        fragment.show(supportFragmentManager, "dialogTag")
     }
 
 }

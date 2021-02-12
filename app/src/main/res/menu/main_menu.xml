@@ -8,7 +8,8 @@
         app:showAsAction="never" />
     <item
         android:id="@+id/addNoteMenuItem"
-        android:icon="@android:drawable/ic_menu_add"
+        android:icon="@drawable/ic_note_add"
+        app:iconTint="?attr/menuItemIconTint"
         android:orderInCategory="20"
         android:title="@string/add_note"
         app:showAsAction="ifRoom" />

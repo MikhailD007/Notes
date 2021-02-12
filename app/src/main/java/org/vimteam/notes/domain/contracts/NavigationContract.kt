@@ -8,6 +8,7 @@ interface NavigationContract {
     abstract class ViewModel : androidx.lifecycle.ViewModel() {
 
         abstract val navigationAction: LiveData<NavigationActions>
+        abstract var twoPane: Boolean
 
         @Throws(Exception::class)
         abstract fun showAbout()

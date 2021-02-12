@@ -11,17 +11,20 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.chip.ChipDrawable
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import kotlinx.android.synthetic.main.fragment_note_edit.*
+import kotlinx.android.synthetic.main.fragment_note_view.*
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.vimteam.notes.R
 import org.vimteam.notes.base.formatTimestamp
+import org.vimteam.notes.base.toSimpleString
 import org.vimteam.notes.domain.contracts.NavigationContract
 import org.vimteam.notes.domain.contracts.NoteContract
 import org.vimteam.notes.domain.models.Mark
 import org.vimteam.notes.domain.models.NavigationActions
-import org.vimteam.notes.domain.models.Note
+import org.vimteam.notes.domain.models.NavigationActions.*
+import org.vimteam.notes.domain.viewmodels.NoteViewModel
 import java.util.*
 
 
@@ -58,11 +61,7 @@ class NoteEditFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.fragment_note_edit, container, false)
     }
@@ -73,6 +72,7 @@ class NoteEditFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        if (!navigationViewModel.twoPane) menu.clear()
         menu.removeItem(R.id.editNoteMenuItem)
         menu.removeItem(R.id.deleteNoteMenuItem)
         if (menu.findItem(R.id.saveNoteMenuItem) == null) inflater.inflate(R.menu.note_edit_menu, menu)
@@ -81,8 +81,12 @@ class NoteEditFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.saveNoteMenuItem -> saveNote()
-            R.id.cancelMenuItem -> activity?.supportFragmentManager?.beginTransaction()?.remove(this)?.commitAllowingStateLoss()
+            R.id.saveNoteMenuItem -> {
+                if (noteUid.isEmpty()) saveNote()
+                else navigationViewModel.performAction(QUERY_UPDATE, noteUid)
+            }
+            R.id.cancelMenuItem -> activity?.supportFragmentManager?.beginTransaction()
+                ?.remove(this)?.commitAllowingStateLoss()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -103,17 +107,34 @@ class NoteEditFragment : Fragment() {
             if (it == null) return@observe
             titleEditText.setText(it.title)
             dateEditText.setText(it.timestamp.formatTimestamp())
-            dateEditText.tag = it.tags
-            noteEditText.setText(it.noteText)
+            dateEditText.tag = it.timestamp
+            tagsEditText.setText(it.tags.toSimpleString())
+            noteTextEditText.setText(it.noteText)
+            markToggleButtonGroup.check(
+                when (it.mark) {
+                    Mark.IMPORTANT -> R.id.importantMarkButton
+                    Mark.VALUES -> R.id.valueMarkButton
+                    Mark.CONTACTS -> R.id.contactMarkButton
+                    Mark.TODO -> R.id.todoMarkButton
+                    Mark.NONE -> 0
+                }
+            )
         }
         noteViewModel.error.observe(viewLifecycleOwner) {
             Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_LONG).show()
         }
         navigationViewModel.navigationAction.observe(viewLifecycleOwner) {
-            if (navigationViewModel.navigationAction.value == NavigationActions.UPDATED) {
-                activity?.supportFragmentManager?.beginTransaction()?.remove(this)?.commitAllowingStateLoss()
-                navigationViewModel.performAction(NavigationActions.READ, navigationViewModel.getNoteUid())
+            if (it == UPDATED) {
+                if (navigationViewModel.twoPane && noteUid.isNotEmpty()) navigationViewModel.performAction(
+                    READ,
+                    noteUid
+                )
+                activity?.supportFragmentManager?.beginTransaction()?.remove(this)
+                    ?.commitAllowingStateLoss()
             }
+            if (it == DELETED) activity?.supportFragmentManager?.beginTransaction()
+                ?.remove(this)?.commitAllowingStateLoss()
+            if (it == UPDATE) saveNote()
         }
     }
 
@@ -134,8 +155,13 @@ class NoteEditFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {
                 if (s == null || s.isEmpty()) return
                 if (s.toString().substring(s.length - 1) == ",") {
-                    val chip: ChipDrawable = ChipDrawable.createFromResource(requireContext(), R.xml.chip)
-                    chip.text = s.toString().substring(spannedLength, s.length - 1)
+                    if (spannedLength >= s.length) return
+                    val chiptext = s.toString().substring(spannedLength, s.length - 1)
+                    if (chiptext.isEmpty()) return
+                    val chip: ChipDrawable =
+                        ChipDrawable.createFromResource(requireContext(), R.xml.chip)
+                    chip.text = chiptext
+                    if (chip.text.isNullOrEmpty()) return
                     chip.setBounds(0, 0, chip.intrinsicWidth, chip.intrinsicHeight)
                     val span = ImageSpan(chip)
                     s.setSpan(span, spannedLength, s.length - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -148,48 +174,39 @@ class NoteEditFragment : Fragment() {
         })
     }
 
-    private fun localeDateToString(date: LocalDate, locale: Locale = Locale.getDefault()): String {
-        return date.toString(DateTimeFormat.shortDate().withLocale(locale))
-    }
-
     private fun saveNote() {
-        var tagsString = tagsEditText.text.toString()
-        if (tagsString.endsWith(",")) tagsString = tagsString.substring(0, tagsString.length - 1)
-        val tags = tagsString.split(",").toTypedArray()
-        val note = Note(
-            uid = if (noteUid == "") UUID.randomUUID().toString() else noteUid,
-            timestamp = dateEditText.tag as Long,
-            tags = tags,
-            mark = when (markToggleButtonGroup.checkedButtonId) {
-                R.id.importantMarkButton -> Mark.IMPORTANT
-                R.id.valueMarkButton -> Mark.VALUES
-                R.id.contactMarkButton -> Mark.CONTACTS
-                R.id.todoMarkButton -> Mark.TODO
-                else -> Mark.NONE
-            },
-            title = titleEditText.text.toString(),
-            noteText = noteEditText.text.toString()
+        val validationErrorsMap = noteViewModel.validateNote(
+            timestamp = dateEditText.tag,
+            title = titleEditText.text.toString()
         )
-        noteViewModel.validateNote(note) {
-            if (it.isEmpty()) {
-                noteViewModel.saveNote(note) {
-                    navigationViewModel.performAction(NavigationActions.UPDATED, it)
-                }
+        setValidationErrors(validationErrorsMap)
+        if (validationErrorsMap.isEmpty()) {
+            noteViewModel.saveNote(
+                uid = noteUid,
+                timestamp = dateEditText.tag,
+                tags = tagsEditText.text.toString(),
+                mark = when (markToggleButtonGroup.checkedButtonId) {
+                    R.id.importantMarkButton -> Mark.IMPORTANT
+                    R.id.valueMarkButton -> Mark.VALUES
+                    R.id.contactMarkButton -> Mark.CONTACTS
+                    R.id.todoMarkButton -> Mark.TODO
+                    else -> Mark.NONE
+                },
+                title = titleEditText.text.toString(),
+                noteText = noteTextEditText.text.toString()
+            ) {
+                navigationViewModel.performAction(UPDATED, it)
             }
-            setValidationErrors(it)
         }
     }
 
     private fun setValidationErrors(errorsMap: Map<String, String>) {
-        if (errorsMap.isEmpty()) {
-            dateTextInputLayout.error = ""
-            titleTextInputLayout.error = ""
-        } else {
-            for ((key, value) in errorsMap) {
-                when (key) {
-                    "date" -> dateTextInputLayout.error = value
-                    "title" -> titleTextInputLayout.error = value
-                }
+        dateTextInputLayout.error = ""
+        titleTextInputLayout.error = ""
+        for ((key, value) in errorsMap) {
+            when (key) {
+                NoteViewModel.DATE_FIELD -> dateTextInputLayout.error = value
+                NoteViewModel.TITLE_FIELD -> titleTextInputLayout.error = value
             }
         }
     }

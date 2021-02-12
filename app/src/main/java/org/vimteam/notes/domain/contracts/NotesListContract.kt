@@ -23,7 +23,7 @@ interface NotesListContract {
         abstract fun getNotesList(filterByTag: String)
 
         @Throws(Exception::class)
-        abstract fun deleteNote(noteUid: String)
+        abstract fun deleteNote(noteUid: String, func: () -> Unit)
 
     }
 

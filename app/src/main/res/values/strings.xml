@@ -21,4 +21,8 @@
     <string name="no_note_found">No such note found</string>
     <string name="no_title">Note should have a title</string>
     <string name="no_date">Specify a date of note</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="delete_query">Are you sure you want to delete note\n\n%1$s\n\npermanently?</string>
+    <string name="update_query">Are you sure you want to update note\n\n%1$s\n\nwith new data?</string>
 </resources>

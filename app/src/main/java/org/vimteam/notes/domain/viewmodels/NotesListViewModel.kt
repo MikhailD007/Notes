@@ -38,7 +38,7 @@ class NotesListViewModel(
         TODO("Not yet implemented")
     }
 
-    override fun deleteNote(noteUid: String) {
+    override fun deleteNote(noteUid: String, func: () -> Unit) {
         try {
             repo.deleteNote(noteUid) {
                 val note = notesList.value?.find {
@@ -48,6 +48,7 @@ class NotesListViewModel(
                     notesList.value?.remove(note)
                     notesList.value = notesList.value
                 }
+                func.invoke()
             }
         } catch (e: Exception) {
             error.value = e
